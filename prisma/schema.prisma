@@ -1,0 +1,55 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+model User {
+  id               Int               @id @default(autoincrement())
+  email            String            @unique
+  password         String
+  name             String
+  candidateProfile CandidateProfile?
+  sessions         Session[]
+}
+
+model Session {
+  id     Int    @id @default(autoincrement())
+  userId Int
+  token  String @unique
+  user   User   @relation(fields: [userId], references: [id])
+}
+
+model CandidateProfile {
+  // Contact email could be different, so we are keeping this
+  email       String
+  salary      Int
+  position    String
+  stack       String
+  description String
+
+  user   User @relation(fields: [userId], references: [id])
+  userId Int  @unique
+}
+
+model Room {
+  id         Int       @id @default(autoincrement())
+  // SQLite is not supporting arrays. So we are using a string Ex. "1,2,3"
+  recipients String    @unique
+  messages   Message[]
+}
+
+model Message {
+  id       Int    @id @default(autoincrement())
+  room     Room   @relation(fields: [roomId], references: [id])
+  roomId   Int
+  fromId   Int
+  fromName String
+  content  String
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
